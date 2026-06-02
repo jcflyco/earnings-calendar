@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财报日历 · 如何制作</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#141925; --panel2:#1b2230; --line:#262e3d;
+    --text:#e6eaf2; --muted:#8a93a6; --accent:#3b82f6;
+    --green:#22c55e; --red:#ef4444; --amber:#f59e0b; --hover:#39435a;
+  }
+  body.light{
+    --bg:#f4f6fa; --panel:#ffffff; --panel2:#eef1f7; --line:#e3e8f0;
+    --text:#1b212e; --muted:#697384; --accent:#2563eb;
+    --green:#16a34a; --red:#dc2626; --amber:#d97706; --hover:#c7cedb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5; padding:24px 16px 60px;
+    transition:background .2s,color .2s;
+  }
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:24px;font-weight:700;letter-spacing:.3px}
+  h1 .em{color:var(--accent)}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .nav{display:flex;gap:8px;margin-top:14px}
+  .nav-link{
+    text-decoration:none;color:var(--muted);background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:8px 16px;
+    font-size:13px;font-weight:600;transition:.15s;
+  }
+  .nav-link:hover{color:var(--text);border-color:var(--hover)}
+  .nav-link.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .topbar{position:fixed;top:16px;right:16px;z-index:20;display:flex;gap:8px}
+  .lang-btn,.icon-btn{
+    background:var(--panel);border:1px solid var(--line);color:var(--text);
+    border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;
+  }
+  .lang-btn{padding:7px 16px}
+  .icon-btn{width:36px;height:34px;border-radius:18px;font-size:15px;line-height:1}
+  .lang-btn:hover,.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:26px 24px;margin-top:18px;max-width:620px;
+  }
+  .card h2{font-size:16px;font-weight:700;margin-bottom:10px}
+  .card p{color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:14px}
+  .card p .hl{color:var(--text);font-weight:600}
+  .codebox{
+    position:relative;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:14px 16px;margin-top:6px;
+  }
+  .codebox pre{
+    white-space:pre-wrap;word-break:break-all;line-height:1.75;margin:0;padding-right:74px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--text);
+  }
+  .copy-btn{
+    position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;border:none;
+    border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;
+  }
+  .copy-btn:hover{filter:brightness(1.08)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="icon-btn" id="themeBtn" title="theme">🌙</button>
+  <button class="lang-btn" id="langBtn">EN</button>
+</div>
+<div class="wrap">
+  <header>
+    <h1>📅 <span id="h1main"></span> <span class="tag" id="h1tag" style="font-size:14px;color:var(--muted);font-weight:400"></span></h1>
+    <div class="nav"><a class="nav-link" id="navCal" href="index.html"></a><a class="nav-link" id="navList" href="list.html"></a><a class="nav-link on" id="navAbout" href="about.html"></a></div>
+  </header>
+
+  <div class="card">
+    <h2 id="aboutH2"></h2>
+    <p id="aboutP1"></p>
+    <h2 id="installH2"></h2>
+    <p id="installDesc"></p>
+    <div class="codebox">
+      <button class="copy-btn" id="copyBtn"></button>
+      <pre id="codeText"></pre>
+    </div>
+    <p id="usage" style="margin-top:18px"></p>
+    <div class="codebox">
+      <button class="copy-btn" id="copyBtn2"></button>
+      <pre id="usageCode"></pre>
+    </div>
+    <h2 id="authorH2" style="margin-top:24px"></h2>
+    <p id="authorInfo"></p>
+  </div>
+
+  <footer style="margin-top:40px;text-align:center;color:var(--muted);font-size:11px;line-height:1.7">
+    <span id="foot"></span>
+  </footer>
+</div>
+
+<script>
+const T = {
+  zh:{ htmlLang:'zh-CN', title:'财报日历 · 如何制作',
+    h1main:'财报<span class="em">日历</span>', tag:'如何制作',
+    navList:'📋 列表视图', navCal:'🗓️ 日历视图', navAbout:'🛠️ 如何制作', langBtn:'EN',
+    aboutH2:'关于本项目',
+    aboutP1:'本财报日历由 <span class="hl">长桥 (Longbridge) Skill</span> 制作。日历数据通过长桥 Skill 的财经日历接口自动获取，并生成中英文双语页面。',
+    installH2:'如何安装 Longbridge Skill',
+    installDesc:'复制下面的内容发送给任意 AI，一键安装：',
+    codeText:'请按照以下指南安装 Longbridge AI toolkit：\nhttps://open.longbridge.com/skill/install.md?invite-code=K3CL9B\n安装完成后，完成登录授权，查询一支股票行情确认可用。',
+    copy:'复制', copied:'已复制 ✓',
+    usage:'安装后，发送以下指令生成财报日历：',
+    usageCode:'调用 longbridge skill 生成财报日历。',
+    authorH2:'关于作者',
+    authorInfo:'Tony D · <a href="mailto:jcflyingco@outlook.com">jcflyingco@outlook.com</a> · 微信号：veryfly888',
+    foot:'数据来源：Longbridge Finance Calendar · 仅供参考，不构成投资建议' },
+  en:{ htmlLang:'en', title:'Earnings Calendar · How it\'s made',
+    h1main:'Earnings <span class="em">Calendar</span>', tag:'How it\'s made',
+    navList:'📋 List', navCal:'🗓️ Calendar', navAbout:'🛠️ How it\'s made', langBtn:'中',
+    aboutH2:'About this project',
+    aboutP1:'This earnings calendar is built with the <span class="hl">Longbridge skill</span>. The calendar data is fetched automatically through the Longbridge skill\'s finance-calendar API, and the bilingual pages are generated from it.',
+    installH2:'How to install the Longbridge Skill',
+    installDesc:'Copy and send this to any AI — it will guide you through the installation:',
+    codeText:'Please install the Longbridge AI toolkit by following this guide:\nhttps://open.longbridge.com/skill/install.md?invite-code=K3CL9B\nAfter installing, complete the login authorization and query a stock quote to confirm it works.',
+    copy:'Copy', copied:'Copied ✓',
+    usage:'After installing, send the following to generate the earnings calendar:',
+    usageCode:'Using the longbridge skill to generate the earnings calendar.',
+    authorH2:'About the author',
+    authorInfo:'Tony D · <a href="mailto:jcflyingco@outlook.com">jcflyingco@outlook.com</a> · WeChat veryfly888',
+    foot:'Source: Longbridge Finance Calendar · For reference only, not investment advice' },
+};
+let lang = localStorage.getItem('fc_lang')||'zh';
+const t=()=>T[lang];
+
+function applyLang(){
+  const x=t();
+  document.documentElement.lang=x.htmlLang;
+  document.title=x.title;
+  document.getElementById('h1main').innerHTML=x.h1main;
+  document.getElementById('h1tag').textContent=x.tag;
+  document.getElementById('navList').textContent=x.navList;
+  document.getElementById('navCal').textContent=x.navCal;
+  document.getElementById('navAbout').textContent=x.navAbout;
+  document.getElementById('aboutH2').textContent=x.aboutH2;
+  document.getElementById('aboutP1').innerHTML=x.aboutP1;
+  document.getElementById('installH2').textContent=x.installH2;
+  document.getElementById('installDesc').textContent=x.installDesc;
+  document.getElementById('codeText').textContent=x.codeText;
+  document.getElementById('copyBtn').textContent=x.copy;
+  document.getElementById('usage').textContent=x.usage;
+  document.getElementById('usageCode').textContent=x.usageCode;
+  document.getElementById('copyBtn2').textContent=x.copy;
+  document.getElementById('authorH2').textContent=x.authorH2;
+  document.getElementById('authorInfo').innerHTML=x.authorInfo;
+  document.getElementById('foot').textContent=x.foot;
+  document.getElementById('langBtn').textContent=x.langBtn;
+}
+document.getElementById('langBtn').addEventListener('click',()=>{
+  lang=lang==='zh'?'en':'zh'; localStorage.setItem('fc_lang',lang); applyLang();
+});
+
+function wireCopy(btnId, getText){
+  const btn=document.getElementById(btnId);
+  btn.addEventListener('click',()=>{
+    const txt=getText();
+    const done=()=>{btn.textContent=t().copied; setTimeout(()=>{btn.textContent=t().copy;},1500);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+    } else { fallbackCopy(txt,done); }
+  });
+}
+wireCopy('copyBtn', ()=>t().codeText);
+wireCopy('copyBtn2', ()=>t().usageCode);
+function fallbackCopy(txt,done){
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta); done();
+}
+
+let theme = localStorage.getItem('fc_theme')||'dark';
+function applyTheme(){
+  document.body.classList.toggle('light', theme==='light');
+  document.getElementById('themeBtn').textContent = theme==='light'?'🌙':'☀️';
+}
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  theme=theme==='dark'?'light':'dark'; localStorage.setItem('fc_theme',theme); applyTheme();
+});
+
+applyTheme();
+applyLang();
+</script>
+</body>
+</html>
