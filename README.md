@@ -51,7 +51,7 @@ https://open.longbridge.com/skill/install.md?invite-code=K3CL9B
 After installing, complete the login authorization and query a stock quote to confirm it works.
 ```
 
-After installing, send the following to generate the earnings calendar:
+After installing, send the following to AI to generate the earnings calendar:
 
 ```bash
 Using the longbridge skill to generate the earnings calendar.

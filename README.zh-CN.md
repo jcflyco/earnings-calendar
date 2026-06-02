@@ -51,7 +51,7 @@ https://open.longbridge.com/skill/install.md?invite-code=K3CL9B
 安装完成后，完成登录授权，查询一支股票行情确认可用。
 ```
 
-安装后，发送以下指令生成财报日历：
+安装后，发送以下指令给任意AI生成财报日历：
 
 ```bash
 调用 longbridge skill 生成财报日历。
