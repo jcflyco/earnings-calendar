@@ -57,7 +57,7 @@ LIST_HTML = '''<!DOCTYPE html>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
 <style>
 __SHARED__
-  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px;align-items:center}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 12px;align-items:center;min-height:40px}
   .search{
     flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);
     border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;outline:none;
@@ -66,7 +66,7 @@ __SHARED__
   .filters{display:flex;gap:6px;flex-wrap:wrap}
   .chip{
     background:var(--panel);border:1px solid var(--line);color:var(--muted);
-    padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;
+    padding:6px 12px;border-radius:18px;font-size:12px;cursor:pointer;
     transition:.15s;user-select:none;
   }
   .chip:hover{color:var(--text)}
@@ -106,7 +106,7 @@ __SHARED__
   .imp-chip{font-weight:600}
   .export-btn{
     background:var(--panel);border:1px solid var(--line);color:var(--text);
-    border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;
+    border-radius:18px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;
   }
   .export-btn:hover{border-color:var(--accent);color:var(--accent)}
   .b-when{background:var(--panel2);color:var(--muted)}
@@ -377,7 +377,7 @@ CAL_HTML = '''<!DOCTYPE html>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
 <style>
 __SHARED__
-  .cal-bar{display:flex;align-items:center;gap:14px;margin:20px 0 10px;flex-wrap:wrap}
+  .cal-bar{display:flex;align-items:center;gap:10px;margin:18px 0 12px;flex-wrap:wrap;min-height:40px}
   .month-title{font-size:18px;font-weight:700;min-width:130px}
   .navbtn{
     background:var(--panel);border:1px solid var(--line);color:var(--text);
