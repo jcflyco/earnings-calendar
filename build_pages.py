@@ -74,6 +74,7 @@ __SHARED__
   .chip:hover{color:var(--text)}
   .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
   .stats{color:var(--muted);font-size:12px;margin:4px 2px 16px}
+  #list{overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
   .day{margin-bottom:22px}
   .day-head{
     display:flex;align-items:baseline;gap:10px;padding:8px 4px;
@@ -273,16 +274,19 @@ function filterInfos(infos){
   return r;
 }
 
+let didInitialScroll=false;
 function render(){
   const list = document.getElementById('list');
-  let total=0, shownDays=0, html='';
+  let total=0, shownDays=0, html='', anchorSet=false;
   for(const day of DATA){
     const infos = filterInfos(day.infos).slice().sort(byImp);
     if(!infos.length) continue;
     shownDays++; total+=infos.length;
     const {label,week}=fmtDate(day.date);
     const isToday = day.date===TODAY;
-    html += `<div class="day">
+    const isAnchor = !anchorSet && day.date>=TODAY;   // today, or the nearest upcoming day
+    if(isAnchor) anchorSet=true;
+    html += `<div class="day"${isAnchor?' id="todayAnchor"':''}>
       <div class="day-head">
         <span class="day-date">${label}</span>
         <span class="day-week">${week}${isToday?' · '+t().today:''}</span>
@@ -294,6 +298,24 @@ function render(){
   list.innerHTML = html || `<div class="empty">${t().empty}</div>`;
   document.getElementById('stats').textContent = t().stats(total, shownDays);
 }
+
+// Give the day list its own scroll region so the header / nav / controls stay pinned at the top.
+function fitList(){
+  const list=document.getElementById('list');
+  const top=list.getBoundingClientRect().top;        // space taken by header + controls + stats
+  const foot=document.querySelector('footer');
+  const footH=foot?foot.offsetHeight+16:0;           // keep the footer visible below the list
+  list.style.height=Math.max(220,(window.innerHeight - top - footH - 24)*2)+'px';
+}
+// Land on today inside the list's own scroll bar; drag it up to reveal past days.
+function scrollToToday(){
+  if(didInitialScroll) return;
+  const list=document.getElementById('list'), a=document.getElementById('todayAnchor');
+  if(!a) return;
+  list.scrollTop += a.getBoundingClientRect().top - list.getBoundingClientRect().top;
+  didInitialScroll=true;
+}
+window.addEventListener('resize',fitList);
 
 function exportICS(){
   const events=[];
@@ -366,6 +388,8 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
 
 applyTheme();
 applyLang();
+fitList();
+scrollToToday();
 </script>
 </body>
 </html>'''
