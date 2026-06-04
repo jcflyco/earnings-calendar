@@ -13,9 +13,15 @@ import json
 import re
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 MARKETS = ["US", "HK"]
+
+# Earnings-call clock times come back as Unix seconds; render them in the
+# event's own market timezone (DST-aware) plus a Beijing time for convenience.
+MARKET_TZ = {"US": ZoneInfo("America/New_York"), "HK": ZoneInfo("Asia/Hong_Kong")}
+BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 # Monthly windows defeat the server-side per-call event cap (US returns ~240/call).
 WINDOWS = [
     ("2026-06-01", "2026-06-30"),
@@ -88,6 +94,16 @@ def content_en(zh):
     return zh
 
 
+def call_times(started_at, market):
+    """From a Unix-second earnings-call start, return (local, beijing) as
+    'MM-DD HH:MM' strings — local in the market's own timezone. ('','') if absent."""
+    tz = MARKET_TZ.get(market)
+    if not started_at or tz is None:
+        return "", ""
+    local = datetime.fromtimestamp(int(started_at), tz=tz)
+    return local.strftime("%m-%d %H:%M"), local.astimezone(BEIJING_TZ).strftime("%m-%d %H:%M")
+
+
 def symbol_of(counter_id):
     p = counter_id.split("/")
     return f"{p[2]}.{p[1]}" if len(p) >= 3 else counter_id
@@ -132,6 +148,8 @@ def build(info):
     act_rev_v, act_rev_raw = kv(info, "actual_revenue")
     sym = symbol_of(info["counter_id"])
     live = info.get("live")
+    started_at = live.get("started_at") if isinstance(live, dict) else None
+    call_local, call_bj = call_times(started_at, info.get("market", ""))
     return {
         "name": info.get("counter_name", ""),
         "symbol": sym,
@@ -148,6 +166,8 @@ def build(info):
         "est_rev_en": fmt_rev(est_rev_raw) if est_rev_raw else ("--" if est_rev_v == "--" else "--"),
         "act_rev_en": fmt_rev(act_rev_raw),
         "live": live.get("name") if isinstance(live, dict) else live,
+        "call_local": call_local,   # earnings-call time in the market's own tz (盘前/盘后 only when absent)
+        "call_bj": call_bj,         # same instant in Beijing time
         "name_en": name_en.get(sym, ""),
         "imp": float(est_rev_raw) if est_rev_raw else 0.0,
     }

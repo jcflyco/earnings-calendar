@@ -128,6 +128,7 @@ __SHARED__
   .live .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
     box-shadow:0 0 0 0 var(--accent);animation:pulse 1.6s infinite}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.6)}70%{box-shadow:0 0 0 6px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+  .call-time{margin-top:5px;font-size:11px;color:var(--muted)}
   .empty{text-align:center;color:var(--muted);padding:60px 0;font-size:14px}
   footer{margin-top:40px;text-align:center;color:var(--muted);font-size:11px;line-height:1.7}
   @media(max-width:560px){.grid{grid-template-columns:1fr}h1{font-size:20px}}
@@ -170,6 +171,14 @@ const GENERATED = "2026-06-02";
 const MKT = {US:'#3b82f6',HK:'#ef4444',CN:'#f59e0b',SG:'#10b981',JP:'#8b5cf6'};
 const MON_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const WHEN_EN = {'盘前':'Pre-market','盘后':'After-hours'};
+const CALL_TZ = {US:{zh:'美东',en:'ET'}, HK:{zh:'港',en:'HKT'}};
+function callTimeText(i){            // "06-03 17:00 美东 · 北京 06-04 05:00"; HK keeps local time only (same as Beijing)
+  if(!i||!i.call_local) return '';
+  const z=(CALL_TZ[i.market]||{})[lang]||'';
+  const sameTz=!i.call_bj||i.call_bj===i.call_local;   // HK (UTC+8) == Beijing, so the second time is redundant
+  const bj=lang==='en'?'Beijing':'北京';
+  return `🕐 ${i.call_local}${z?' '+z:''}${sameTz?'':` · ${bj} ${i.call_bj}`}`;
+}
 __ICS__
 const T = {
   zh:{ htmlLang:'zh-CN', title:'财报日历 · Earnings Calendar',
@@ -260,6 +269,7 @@ function card(i){
       ${metricHtml(t().rev, er, ar)}
     </div>
     ${i.live?`<div class="live"><span class="dot"></span>${esc(i.live)}</div>`:''}
+    ${i.call_local?`<div class="call-time">${esc(callTimeText(i))}</div>`:''}
   </div>`;
 }
 
@@ -324,6 +334,7 @@ function exportICS(){
       const when=i.when?' · '+whenText(i.when):'';
       const er=lang==='en'?(i.est_rev_en||''):i.est_rev;
       const parts=[];
+      if(i.call_local) parts.push(callTimeText(i));
       if(i.est_eps) parts.push(`${t().eps} ${t().est} ${trVal(i.est_eps)}`);
       if(er) parts.push(`${t().rev} ${t().est} ${trVal(er)}`);
       parts.push(quoteUrl(i));
@@ -474,6 +485,7 @@ __SHARED__
     color:var(--text);text-decoration:none}
   a.n:hover{color:var(--accent);text-decoration:underline}
   .row-name .s{font-size:11px;color:var(--muted)}
+  .row-call{font-size:11px;color:var(--muted);margin-top:2px}
   .badge{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;color:#fff;flex-shrink:0}
   .when{font-size:10px;color:var(--muted);flex-shrink:0}
   @media(max-width:640px){
@@ -526,6 +538,14 @@ const GENERATED = "2026-06-02";
 const MKT = {US:'#3b82f6',HK:'#ef4444',CN:'#f59e0b',SG:'#10b981',JP:'#8b5cf6'};
 const MON_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const WHEN_EN = {'盘前':'Pre-market','盘后':'After-hours'};
+const CALL_TZ = {US:{zh:'美东',en:'ET'}, HK:{zh:'港',en:'HKT'}};
+function callTimeText(i){            // "06-03 17:00 美东 · 北京 06-04 05:00"; HK keeps local time only (same as Beijing)
+  if(!i||!i.call_local) return '';
+  const z=(CALL_TZ[i.market]||{})[lang]||'';
+  const sameTz=!i.call_bj||i.call_bj===i.call_local;   // HK (UTC+8) == Beijing, so the second time is redundant
+  const bj=lang==='en'?'Beijing':'北京';
+  return `🕐 ${i.call_local}${z?' '+z:''}${sameTz?'':` · ${bj} ${i.call_bj}`}`;
+}
 __ICS__
 const T = {
   zh:{ htmlLang:'zh-CN', title:'财报日历 · 日历视图',
@@ -623,7 +643,7 @@ function openDay(date){
       : `<div class="ico-fb" style="background:${color}">${initials}</div>`;
     rows+=`<div class="row">
       ${ico}
-      <div class="row-name"><a class="n" href="${quoteUrl(i)}" target="_blank" rel="noopener">${i.imp>=IMP_STAR?'⭐ ':''}${esc(nameOf(i))}</a><div class="s">${esc(i.symbol)}</div></div>
+      <div class="row-name"><a class="n" href="${quoteUrl(i)}" target="_blank" rel="noopener">${i.imp>=IMP_STAR?'⭐ ':''}${esc(nameOf(i))}</a><div class="s">${esc(i.symbol)}</div>${i.call_local?`<div class="row-call">${esc(callTimeText(i))}</div>`:''}</div>
       ${i.when?`<span class="when">${esc(whenText(i.when))}</span>`:''}
       <span class="badge" style="background:${color}">${i.market}</span>
     </div>`;
@@ -646,6 +666,7 @@ function exportICS(){
       const when=i.when?' · '+whenText(i.when):'';
       const er=lang==='en'?(i.est_rev_en||''):i.est_rev;
       const parts=[];
+      if(i.call_local) parts.push(callTimeText(i));
       if(i.est_eps) parts.push(`${t().eps} ${t().est} ${i.est_eps}`);
       if(er) parts.push(`${t().rev} ${t().est} ${er}`);
       parts.push(quoteUrl(i));
