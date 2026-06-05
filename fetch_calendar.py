@@ -31,10 +31,9 @@ WINDOWS = [
     ("2026-10-01", "2026-10-31"),
     ("2026-11-01", "2026-11-30"),
     ("2026-12-01", "2026-12-31"),
-    ("2027-01-01", "2027-01-31"),
-    ("2027-02-01", "2027-02-28"),
-    ("2027-03-01", "2027-03-31"),
 ]
+START_DATE = WINDOWS[0][0]
+END_DATE = WINDOWS[-1][1]
 
 
 def run(args, lang):
@@ -121,6 +120,8 @@ for market in MARKETS:
             continue
         for day in data.get("list", []):
             d = day["date"]
+            if d < START_DATE or d > END_DATE:
+                continue
             for info in day.get("infos", []):
                 if info.get("id") in seen_ids:
                     continue

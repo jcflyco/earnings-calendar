@@ -3,9 +3,11 @@
 calendar_data.json, embedding the data inline so the pages work over file://.
 Both pages are bilingual (zh/en) with a persisted top-right language toggle."""
 import json
+from datetime import date
 
 DATA = json.load(open('calendar_data.json'))
 COMPACT = json.dumps(DATA, ensure_ascii=False, separators=(',', ':'))
+GENERATED_DATE = date.today().isoformat()
 
 # ---- shared CSS bits reused by both pages -------------------------------
 SHARED_HEAD = '''  :root{
@@ -167,7 +169,7 @@ __SHARED__
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
 const TODAY = (()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;})();
-const GENERATED = "2026-06-02";
+const GENERATED = "__GENERATED__";
 const MKT = {US:'#3b82f6',HK:'#ef4444',CN:'#f59e0b',SG:'#10b981',JP:'#8b5cf6'};
 const MON_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const WHEN_EN = {'盘前':'Pre-market','盘后':'After-hours'};
@@ -534,7 +536,7 @@ __SHARED__
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
 const TODAY = (()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;})();
-const GENERATED = "2026-06-02";
+const GENERATED = "__GENERATED__";
 const MKT = {US:'#3b82f6',HK:'#ef4444',CN:'#f59e0b',SG:'#10b981',JP:'#8b5cf6'};
 const MON_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const WHEN_EN = {'盘前':'Pre-market','盘后':'After-hours'};
@@ -932,7 +934,7 @@ function downloadICS(events, calName){
 '''
 
 def build(tpl, fname):
-    out = tpl.replace('__SHARED__', SHARED_HEAD).replace('__ICS__', ICS_JS).replace('__DATA__', COMPACT)
+    out = tpl.replace('__SHARED__', SHARED_HEAD).replace('__ICS__', ICS_JS).replace('__DATA__', COMPACT).replace('__GENERATED__', GENERATED_DATE)
     open(fname, 'w').write(out)
     print('wrote', fname, len(out), 'bytes')
 
