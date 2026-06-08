@@ -133,6 +133,7 @@ __SHARED__
   .call-time{margin-top:5px;font-size:11px;color:var(--muted)}
   .empty{text-align:center;color:var(--muted);padding:60px 0;font-size:14px}
   footer{margin-top:40px;text-align:center;color:var(--muted);font-size:11px;line-height:1.7}
+  .footer-note{color:var(--muted)}
   @media(max-width:560px){.grid{grid-template-columns:1fr}h1{font-size:20px}}
 </style>
 </head>
@@ -160,6 +161,8 @@ __SHARED__
 
   <footer>
     <span id="sub"></span><br>
+    <span id="meta" class="footer-note"></span><br>
+    <span id="rules" class="footer-note"></span><br>
     <span id="foot"></span><br>
     <span id="gen"></span>
   </footer>
@@ -190,7 +193,9 @@ const T = {
     est:'预期', eps:'EPS', rev:'营收', tba:'待公布', empty:'没有匹配的财报记录 🔍',
     impLabel:'⭐ 重磅', impTip:'预期营收 ≥ 100 亿', exportLabel:'📥 导出日历',
     reportWord:'财报', icsName:'财报日历',
-    foot:'数据来源：Longbridge Finance Calendar · 仅供参考，不构成投资建议', langBtn:'EN',
+    foot:'仅供参考，不构成投资建议', langBtn:'EN',
+    meta:(d,s,e,mk,n)=>`数据来源：Longbridge Finance Calendar · 最近刷新：${d} · 覆盖范围：${s} 至 ${e} · 市场：${mk} · 原始证券事件：${n}`,
+    rules:'重磅逻辑：预期营收 ≥ 100 亿，显示 ⭐ 并进入「重磅」筛选。',
     week:['周日','周一','周二','周三','周四','周五','周六'],
     date:(m,d)=>`${m}月${d}日`,
     count:(n)=>`${n} 家`,
@@ -204,7 +209,9 @@ const T = {
     est:'Est.', eps:'EPS', rev:'Revenue', tba:'TBA', empty:'No matching earnings 🔍',
     impLabel:'⭐ Notable', impTip:'Est. revenue ≥ 10B', exportLabel:'📥 Export .ics',
     reportWord:'Earnings', icsName:'Earnings Calendar',
-    foot:'Source: Longbridge Finance Calendar · For reference only, not investment advice', langBtn:'中',
+    foot:'For reference only, not investment advice', langBtn:'中',
+    meta:(d,s,e,mk,n)=>`Source: Longbridge Finance Calendar · Last refreshed: ${d} · Coverage: ${s} to ${e} · Markets: ${mk} · Raw security events: ${n}`,
+    rules:'Notable logic: estimated revenue ≥ 10B, shown with ⭐ and included in the Notable filter.',
     week:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     date:(m,d)=>`${MON_EN[m-1]} ${d}`,
     count:(n)=>`${n}`,
@@ -370,6 +377,8 @@ function applyLang(){
   document.getElementById('exportBtn').textContent=x.exportLabel;
   const totalAll=DATA.reduce((a,d)=>a+d.infos.length,0);
   document.getElementById('sub').textContent=x.sub(DATA[0].date,DATA[DATA.length-1].date,markets.join(' / '),totalAll);
+  document.getElementById('meta').textContent=x.meta(GENERATED,DATA[0].date,DATA[DATA.length-1].date,markets.join(' / '),totalAll);
+  document.getElementById('rules').textContent=x.rules;
   document.getElementById('gen').textContent=x.gen(GENERATED);
   buildFilters();
   render();
@@ -525,6 +534,8 @@ __SHARED__
 
   <footer>
     <span id="sub"></span><br>
+    <span id="meta" class="footer-note"></span><br>
+    <span id="rules" class="footer-note"></span><br>
     <span id="foot"></span><br>
     <span id="gen"></span>
   </footer>
@@ -557,7 +568,9 @@ const T = {
     est:'预期', eps:'EPS', rev:'营收',
     impLabel:'⭐ 重磅', impTip:'预期营收 ≥ 100 亿', exportLabel:'📥 导出日历',
     reportWord:'财报', icsName:'财报日历',
-    foot:'数据来源：Longbridge Finance Calendar · 仅供参考，不构成投资建议',
+    foot:'仅供参考，不构成投资建议',
+    meta:(d,s,e,mk,n)=>`数据来源：Longbridge Finance Calendar · 最近刷新：${d} · 覆盖范围：${s} 至 ${e} · 市场：${mk} · 原始证券事件：${n}`,
+    rules:'重磅逻辑：预期营收 ≥ 100 亿，显示 ⭐ 并进入「重磅」筛选。',
     weekFull:['周日','周一','周二','周三','周四','周五','周六'],
     monthTitle:(y,m)=>`${y}年 ${m}月`,
     date:(m,d)=>`${m}月${d}日`,
@@ -573,7 +586,9 @@ const T = {
     est:'Est.', eps:'EPS', rev:'Revenue',
     impLabel:'⭐ Notable', impTip:'Est. revenue ≥ 10B', exportLabel:'📥 Export .ics',
     reportWord:'Earnings', icsName:'Earnings Calendar',
-    foot:'Source: Longbridge Finance Calendar · For reference only, not investment advice',
+    foot:'For reference only, not investment advice',
+    meta:(d,s,e,mk,n)=>`Source: Longbridge Finance Calendar · Last refreshed: ${d} · Coverage: ${s} to ${e} · Markets: ${mk} · Raw security events: ${n}`,
+    rules:'Notable logic: estimated revenue ≥ 10B, shown with ⭐ and included in the Notable filter.',
     weekFull:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     monthTitle:(y,m)=>`${MON_EN[m-1]} ${y}`,
     date:(m,d)=>`${MON_EN[m-1]} ${d}`,
@@ -706,6 +721,8 @@ function applyLang(){
   document.getElementById('exportBtn').textContent=x.exportLabel;
   const totalAll=DATA.reduce((a,d)=>a+d.infos.length,0);
   document.getElementById('sub').textContent=x.sub(DATA[0].date,DATA[DATA.length-1].date,markets.join(' / '),totalAll);
+  document.getElementById('meta').textContent=x.meta(GENERATED,DATA[0].date,DATA[DATA.length-1].date,markets.join(' / '),totalAll);
+  document.getElementById('rules').textContent=x.rules;
   document.getElementById('gen').textContent=x.gen(GENERATED);
   document.getElementById('legend').innerHTML=markets.map(m=>`<span><i style="background:${colorOf(m)}"></i>${m}</span>`).join('');
   buildWeekhead(); buildFilters(); renderMonth();
