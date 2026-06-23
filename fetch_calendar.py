@@ -108,6 +108,13 @@ def symbol_of(counter_id):
     return f"{p[2]}.{p[1]}" if len(p) >= 3 else counter_id
 
 
+def market_of(counter_id):
+    """The reliable market segment from a counter_id ('report/US/MCAH' -> 'US').
+    Preferred over the report payload's `market`, which is sometimes empty."""
+    p = counter_id.split("/")
+    return p[1] if len(p) >= 3 else ""
+
+
 # --- 1. fetch zh reports, grouped by day, US before HK, deduped by event id ----
 days = {}            # date -> {"US": [info...], "HK": [info...]}
 seen_ids = set()
@@ -148,13 +155,14 @@ def build(info):
     est_rev_v, est_rev_raw = kv(info, "estimate_revenue")
     act_rev_v, act_rev_raw = kv(info, "actual_revenue")
     sym = symbol_of(info["counter_id"])
+    mkt = market_of(info["counter_id"])
     live = info.get("live")
     started_at = live.get("started_at") if isinstance(live, dict) else None
-    call_local, call_bj = call_times(started_at, info.get("market", ""))
+    call_local, call_bj = call_times(started_at, mkt)
     return {
         "name": info.get("counter_name", ""),
         "symbol": sym,
-        "market": info.get("market", ""),
+        "market": mkt,
         "content": info.get("content", ""),
         "content_en": content_en(info.get("content", "")),
         "icon": info.get("icon", ""),
@@ -176,7 +184,9 @@ def build(info):
 out = []
 for d in sorted(days):
     infos = [build(i) for i in days[d]["US"]] + [build(i) for i in days[d]["HK"]]
-    out.append({"date": d, "infos": infos})
+    infos = [i for i in infos if i["market"] in ("US", "HK")]  # keep US/HK only
+    if infos:
+        out.append({"date": d, "infos": infos})
 
 json.dump(out, open("calendar_data.json", "w"), ensure_ascii=False, indent=1)
 total = sum(len(x["infos"]) for x in out)
