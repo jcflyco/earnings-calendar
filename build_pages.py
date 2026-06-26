@@ -235,7 +235,7 @@ const byImp=(a,b)=>(b.imp||0)-(a.imp||0);
 
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function nameOf(i){return lang==='en'?(i.name_en||i.name):(i.name||i.name_en);}
-function quoteUrl(i){return `https://longbridge.com/${lang==='en'?'en':'zh-CN'}/quote/${encodeURIComponent(i.symbol)}/topics`;}
+function quoteUrl(i){return `https://longbridge.com/${lang==='en'?'en':'zh-CN'}/quote/${encodeURIComponent(i.symbol)}`;}
 function fmtDate(s){const[y,m,dd]=s.split('-').map(Number);const dt=new Date(Date.UTC(y,m-1,dd));
   return {label:t().date(m,dd), week:t().week[dt.getUTCDay()]};}
 function whenClass(w){if(!w)return'';if(w.includes('盘前'))return'pre';if(w.includes('盘后'))return'post';return'';}
@@ -629,7 +629,7 @@ const pad=(n)=>String(n).padStart(2,'0');
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function whenText(w){return lang==='en'?(WHEN_EN[w]||w):w;}
 function nameOf(i){return lang==='en'?(i.name_en||i.name):(i.name||i.name_en);}
-function quoteUrl(i){return `https://longbridge.com/${lang==='en'?'en':'zh-CN'}/quote/${encodeURIComponent(i.symbol)}/topics`;}
+function quoteUrl(i){return `https://longbridge.com/${lang==='en'?'en':'zh-CN'}/quote/${encodeURIComponent(i.symbol)}`;}
 function infosFor(date){
   let l=byDate[date]||[];
   if(activeMkt!=='ALL') l=l.filter(i=>i.market===activeMkt);
