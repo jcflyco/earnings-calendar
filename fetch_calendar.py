@@ -13,7 +13,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 MARKETS = ["US", "HK"]
@@ -22,18 +22,8 @@ MARKETS = ["US", "HK"]
 # event's own market timezone (DST-aware) plus a Beijing time for convenience.
 MARKET_TZ = {"US": ZoneInfo("America/New_York"), "HK": ZoneInfo("Asia/Hong_Kong")}
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
-# Monthly windows defeat the server-side per-call event cap (US returns ~240/call).
-WINDOWS = [
-    ("2026-06-01", "2026-06-30"),
-    ("2026-07-01", "2026-07-31"),
-    ("2026-08-01", "2026-08-31"),
-    ("2026-09-01", "2026-09-30"),
-    ("2026-10-01", "2026-10-31"),
-    ("2026-11-01", "2026-11-30"),
-    ("2026-12-01", "2026-12-31"),
-]
-START_DATE = WINDOWS[0][0]
-END_DATE = WINDOWS[-1][1]
+START_DATE = "2026-06-01"
+END_DATE = "2026-12-31"
 
 
 def run(args, lang):
@@ -120,12 +110,16 @@ days = {}            # date -> {"US": [info...], "HK": [info...]}
 seen_ids = set()
 for market in MARKETS:
     kept = 0
-    for start, end in WINDOWS:
+    # The endpoint ignores `end`: it returns days forward from `start` until a
+    # server-side event cap (~1000, cut on a day boundary) and exposes no cursor.
+    # So page by date — resume from the day after the last one we got back.
+    cursor = START_DATE
+    while cursor <= END_DATE:
         data = run(["finance-calendar", "report", "--market", market,
-                    "--start", start, "--end", end, "--count", "1000"], "zh-CN")
-        if not data:
-            continue
-        for day in data.get("list", []):
+                    "--start", cursor, "--end", END_DATE, "--count", "1000"], "zh-CN")
+        if not data or not data.get("list"):
+            break
+        for day in data["list"]:
             d = day["date"]
             if d < START_DATE or d > END_DATE:
                 continue
@@ -135,6 +129,8 @@ for market in MARKETS:
                 seen_ids.add(info.get("id"))
                 days.setdefault(d, {"US": [], "HK": []})[market].append(info)
                 kept += 1
+        last = max(day["date"] for day in data["list"])
+        cursor = (date.fromisoformat(max(last, cursor)) + timedelta(days=1)).isoformat()
     print(f"  {market}: {kept} events")
 
 # --- 2. resolve English names via `static --lang en`, batched ------------------
