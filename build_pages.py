@@ -199,11 +199,11 @@ const T = {
     navList:'📋 列表视图', navCal:'🗓️ 日历视图', navAbout:'🛠️ 如何制作',
     search:'搜索公司名 / 代码…', all:'全部', today:'今天',
     est:'预期', eps:'EPS', rev:'营收', tba:'待公布', empty:'没有匹配的财报记录 🔍',
-    impLabel:'⭐ 重磅', impTip:'预期营收 ≥ 100 亿', exportLabel:'📥 导出日历',
+    impLabel:'⭐ 重磅', impTip:'市值 ≥ 1000 亿美元', exportLabel:'📥 导出日历',
     reportWord:'财报', icsName:'财报日历',
     foot:'仅供参考，不构成投资建议', langBtn:'EN',
     meta:(d,s,e,mk,n)=>`数据来源：Longbridge Finance Calendar · 最近刷新：${d} · 覆盖范围：${s} 至 ${e} · 市场：${mk} · 原始证券事件：${n}`,
-    rules:'重磅逻辑：预期营收 ≥ 100 亿，显示 ⭐ 并进入「重磅」筛选。',
+    rules:'排序与重磅逻辑：同一天按市值从高到低排列（港股按 7.8 折算美元）；市值 ≥ 1000 亿美元显示 ⭐ 并进入「重磅」筛选。',
     week:['周日','周一','周二','周三','周四','周五','周六'],
     date:(m,d)=>`${m}月${d}日`,
     count:(n)=>`${n} 家`,
@@ -215,11 +215,11 @@ const T = {
     navList:'📋 List', navCal:'🗓️ Calendar', navAbout:'🛠️ How it\\'s made',
     search:'Search name / symbol…', all:'All', today:'Today',
     est:'Est.', eps:'EPS', rev:'Revenue', tba:'TBA', empty:'No matching earnings 🔍',
-    impLabel:'⭐ Notable', impTip:'Est. revenue ≥ 10B', exportLabel:'📥 Export .ics',
+    impLabel:'⭐ Notable', impTip:'Market cap ≥ $100B', exportLabel:'📥 Export .ics',
     reportWord:'Earnings', icsName:'Earnings Calendar',
     foot:'For reference only, not investment advice', langBtn:'中',
     meta:(d,s,e,mk,n)=>`Source: Longbridge Finance Calendar · Last refreshed: ${d} · Coverage: ${s} to ${e} · Markets: ${mk} · Raw security events: ${n}`,
-    rules:'Notable logic: estimated revenue ≥ 10B, shown with ⭐ and included in the Notable filter.',
+    rules:'Sorting & Notable logic: within a day, ranked by market cap descending (HK converted to USD at 7.8); market cap ≥ $100B is shown with ⭐ and included in the Notable filter.',
     week:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     date:(m,d)=>`${MON_EN[m-1]} ${d}`,
     count:(n)=>`${n}`,
@@ -582,11 +582,11 @@ const T = {
     navList:'📋 列表视图', navCal:'🗓️ 日历视图', navAbout:'🛠️ 如何制作', all:'全部', today:'今天', langBtn:'EN',
     search:'搜索公司名 / 代码…', empty:'本月没有匹配的财报 🔍',
     est:'预期', eps:'EPS', rev:'营收',
-    impLabel:'⭐ 重磅', impTip:'预期营收 ≥ 100 亿', exportLabel:'📥 导出日历',
+    impLabel:'⭐ 重磅', impTip:'市值 ≥ 1000 亿美元', exportLabel:'📥 导出日历',
     reportWord:'财报', icsName:'财报日历',
     foot:'仅供参考，不构成投资建议',
     meta:(d,s,e,mk,n)=>`数据来源：Longbridge Finance Calendar · 最近刷新：${d} · 覆盖范围：${s} 至 ${e} · 市场：${mk} · 原始证券事件：${n}`,
-    rules:'重磅逻辑：预期营收 ≥ 100 亿，显示 ⭐ 并进入「重磅」筛选。',
+    rules:'排序与重磅逻辑：同一天按市值从高到低排列（港股按 7.8 折算美元）；市值 ≥ 1000 亿美元显示 ⭐ 并进入「重磅」筛选。',
     weekFull:['周日','周一','周二','周三','周四','周五','周六'],
     monthTitle:(y,m)=>`${y}年 ${m}月`,
     date:(m,d)=>`${m}月${d}日`,
@@ -600,11 +600,11 @@ const T = {
     navList:'📋 List', navCal:'🗓️ Calendar', navAbout:'🛠️ How it\\'s made', all:'All', today:'Today', langBtn:'中',
     search:'Search name / symbol…', empty:'No matching earnings this month 🔍',
     est:'Est.', eps:'EPS', rev:'Revenue',
-    impLabel:'⭐ Notable', impTip:'Est. revenue ≥ 10B', exportLabel:'📥 Export .ics',
+    impLabel:'⭐ Notable', impTip:'Market cap ≥ $100B', exportLabel:'📥 Export .ics',
     reportWord:'Earnings', icsName:'Earnings Calendar',
     foot:'For reference only, not investment advice',
     meta:(d,s,e,mk,n)=>`Source: Longbridge Finance Calendar · Last refreshed: ${d} · Coverage: ${s} to ${e} · Markets: ${mk} · Raw security events: ${n}`,
-    rules:'Notable logic: estimated revenue ≥ 10B, shown with ⭐ and included in the Notable filter.',
+    rules:'Sorting & Notable logic: within a day, ranked by market cap descending (HK converted to USD at 7.8); market cap ≥ $100B is shown with ⭐ and included in the Notable filter.',
     weekFull:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     monthTitle:(y,m)=>`${MON_EN[m-1]} ${y}`,
     date:(m,d)=>`${MON_EN[m-1]} ${d}`,
@@ -953,7 +953,7 @@ applyLang();
 
 # ---- shared .ics export helper (raw string: backslashes stay literal) ---
 ICS_JS = r'''
-const IMP_STAR = 1e10;  // 预期营收 >= 100亿 视为「重磅」
+const IMP_STAR = 1e11;  // 市值 >= 1000 亿美元视为「重磅」
 function icsEsc(s){
   return String(s==null?'':s).split('\\').join('\\\\').split(';').join('\\;').split(',').join('\\,').split('\n').join('\\n');
 }

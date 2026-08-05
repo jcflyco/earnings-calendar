@@ -7,6 +7,8 @@ Data shape per entry mirrors what the bilingual pages expect:
   est_eps, act_eps, when, currency, icon, symbol, market, live, imp
 
 zh fields come from `report --lang zh-CN`; name_en comes from `static --lang en`;
+imp is the market cap from `calc-index --fields mktcap`, normalized to USD — it is
+what the pages sort each day by and what drives the ⭐ badge.
 content_en and the *_en revenue strings are derived locally to match the existing format.
 """
 import json
@@ -22,6 +24,9 @@ MARKETS = ["US", "HK"]
 # event's own market timezone (DST-aware) plus a Beijing time for convenience.
 MARKET_TZ = {"US": ZoneInfo("America/New_York"), "HK": ZoneInfo("Asia/Hong_Kong")}
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
+# Market caps come back in the listing currency; normalize HK to USD so the two
+# markets sort against each other. HKD is pegged in a 7.75–7.85 band.
+HKD_PER_USD = 7.8
 START_DATE = "2026-06-01"
 END_DATE = "2026-12-31"
 
@@ -144,7 +149,22 @@ for x in range(0, len(symbols), 10):
         name_en[r["symbol"]] = r.get("name", "")
 print(f"  resolved {len(name_en)}/{len(symbols)} English names")
 
-# --- 3. assemble records in the page's schema --------------------------------
+# --- 3. market caps, batched — this is the sort key ---------------------------
+mktcap = {}
+for x in range(0, len(symbols), 50):
+    batch = symbols[x:x + 50]
+    res = run(["calc-index", *batch, "--fields", "mktcap"], "en")
+    for r in (res or []):
+        try:                                   # unlisted / no data comes back as '-'
+            v = float(r.get("mktcap") or 0)
+        except ValueError:
+            v = 0.0
+        if r["symbol"].endswith(".HK"):
+            v /= HKD_PER_USD
+        mktcap[r["symbol"]] = v
+print(f"  resolved {sum(1 for v in mktcap.values() if v)}/{len(symbols)} market caps")
+
+# --- 4. assemble records in the page's schema --------------------------------
 def build(info):
     est_eps_v, _ = kv(info, "estimate_eps")
     act_eps_v, _ = kv(info, "actual_eps")
@@ -174,7 +194,7 @@ def build(info):
         "call_local": call_local,   # earnings-call time in the market's own tz (盘前/盘后 only when absent)
         "call_bj": call_bj,         # same instant in Beijing time
         "name_en": name_en.get(sym, ""),
-        "imp": float(est_rev_raw) if est_rev_raw else 0.0,
+        "imp": mktcap.get(sym, 0.0),   # market cap in USD — drives sort order and ⭐
     }
 
 out = []
@@ -189,5 +209,5 @@ total = sum(len(x["infos"]) for x in out)
 print(f"  wrote calendar_data.json: {len(out)} days, {total} events "
       f"({out[0]['date']} → {out[-1]['date']})")
 
-# --- 4. regenerate the pages --------------------------------------------------
+# --- 5. regenerate the pages --------------------------------------------------
 subprocess.run([sys.executable, "build_pages.py"], check=True)

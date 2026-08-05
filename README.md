@@ -20,7 +20,7 @@ A lightweight, **bilingual (EN/中文)** earnings calendar for **US & HK** stock
   - 📋 **List view** (`list.html`) — earnings grouped by day, with EPS / revenue estimates vs. actuals (beat/miss coloring) and earnings-call indicators.
 - **Bilingual everything** — UI text **and company names** switch between Chinese and English. Language preference is remembered across pages.
 - **Light / dark theme** — top-right toggle, also remembered.
-- **Importance ranking** — each day is sorted by expected revenue; large caps (est. revenue ≥ 10B) get a ⭐ badge, with a **"⭐ Notable" filter** to show only the big ones.
+- **Importance ranking** — each day is sorted by market cap descending (HK converted to USD at 7.8); large caps (≥ $100B) get a ⭐ badge, with a **"⭐ Notable" filter** to show only the big ones.
 - **Search & market filter** — filter by US / HK, search by company name (either language) or ticker.
 - **Export to `.ics`** — one click exports the current (filtered) results as a calendar file you can import into Google / Apple / Feishu Calendar.
 - **Quote links** — every company name links to its Longbridge quote page (locale-aware).
