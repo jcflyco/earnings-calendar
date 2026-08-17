@@ -28,7 +28,7 @@ BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 # markets sort against each other. HKD is pegged in a 7.75–7.85 band.
 HKD_PER_USD = 7.8
 START_DATE = "2026-06-01"
-END_DATE = "2026-12-31"
+END_DATE = "2027-02-28"
 
 
 def run(args, lang):
