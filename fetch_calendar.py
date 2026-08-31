@@ -142,8 +142,8 @@ for market in MARKETS:
 symbols = sorted({symbol_of(i["counter_id"])
                   for d in days.values() for m in d.values() for i in m})
 name_en = {}
-for x in range(0, len(symbols), 10):
-    batch = symbols[x:x + 10]
+for x in range(0, len(symbols), 50):
+    batch = symbols[x:x + 50]
     res = run(["static", *batch], "en")
     for r in (res or []):
         name_en[r["symbol"]] = r.get("name", "")

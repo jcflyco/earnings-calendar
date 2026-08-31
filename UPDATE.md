@@ -21,7 +21,7 @@ END_DATE   = "2026-12-31"
 python3 fetch_calendar.py     # 抓数据 → 写 calendar_data.json → 自动调 build_pages.py 生成 3 个页面
 ```
 
-耗时约 3–5 分钟，大头在第 2 步解析英文名（`static` 命令按 10 个一批，5000 个 symbol 要几百次调用）。
+耗时约 8–10 分钟，大头在第 2 步解析英文名（`static` 命令按 50 个一批，5000 个 symbol 要一百多次调用）。
 
 正常输出：
 
