@@ -15,6 +15,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -31,14 +32,21 @@ START_DATE = "2026-08-01"
 END_DATE = "2027-04-30"
 
 
-def run(args, lang):
-    """Invoke the longbridge CLI with a forced LANG so name localization is honored."""
+def run(args, lang, attempts=3):
+    """Invoke the longbridge CLI with a forced LANG so name localization is honored.
+    Retries transient network failures: a single dropped request mid-pagination
+    otherwise ends the loop and silently loses every later day."""
     env_lang = "en_US.UTF-8" if lang == "en" else "zh_CN.UTF-8"
-    out = subprocess.run(
-        ["longbridge", *args, "--format", "json", "--lang", lang],
-        capture_output=True, text=True,
-        env={"LANG": env_lang, "PATH": "/opt/homebrew/bin:/usr/bin:/bin"},
-    )
+    for attempt in range(attempts):
+        out = subprocess.run(
+            ["longbridge", *args, "--format", "json", "--lang", lang],
+            capture_output=True, text=True,
+            env={"LANG": env_lang, "PATH": "/opt/homebrew/bin:/usr/bin:/bin"},
+        )
+        if out.returncode == 0:
+            break
+        if attempt < attempts - 1:
+            time.sleep(2 * (attempt + 1))
     if out.returncode != 0:
         sys.stderr.write(f"! {' '.join(args)} ({lang}) failed: {out.stderr.strip()}\n")
         return None
