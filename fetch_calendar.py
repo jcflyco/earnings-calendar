@@ -28,8 +28,8 @@ BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 # Market caps come back in the listing currency; normalize HK to USD so the two
 # markets sort against each other. HKD is pegged in a 7.75–7.85 band.
 HKD_PER_USD = 7.8
-START_DATE = "2026-08-01"
-END_DATE = "2027-04-30"
+START_DATE = "2026-09-01"
+END_DATE = "2027-05-31"
 
 
 def run(args, lang, attempts=3):
